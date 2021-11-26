@@ -1,0 +1,74 @@
+mounted () {
+    document.getElementById('detail').style.height = window.screen.availHeight * 0.09 + 'px'
+    this.$nextTick(() => {
+      this.drawBar()
+    })
+    window.addEventListener('resize', () => {
+      this.$echarts.init(document.getElementById('detail')).resize()
+    })
+  },
+
+  methods: {
+    getData () {
+      let that = this
+      this.$axios
+        .post('', {name: that.$route.params.id}).then((Response) => {
+          that.fiveDay = Response.data.data
+        })
+        .catch((failResponse) => {
+          console.log(failResponse)
+        })
+    },
+    convertDate () {
+      let res = []
+      for (let i = 0; i < this.fiveDay.length; i++) {
+        let date = this.fiveDay[i].date
+        if (date) {
+          res.push(date)
+        }
+      }
+      return res
+    },
+    convertData (tmp) {
+      let res = []
+      for (let i = 0; i < this.fiveDay.length; i++) {
+        let pm = this.fiveDay[i][tmp]
+        if (pm) {
+          res.push(pm)
+        }
+      }
+      return res
+    },
+    drawBar () {
+      console.log(this.$route.params)
+      let detailContainer = document.getElementById('detail')
+      let resizeDetailContainer = function () {
+        detailContainer.style.width = document.body.offsetWidth + 'px'
+        detailContainer.style.height = document.body.offsetHeight + 'px'
+      }
+      resizeDetailContainer()
+      // 基于准备好的dom，初始化echarts实例
+      let detail = this.$echarts.init(detailContainer)
+      let optionMap = {
+        xAxis: {
+          type: 'category',
+          data: this.convertDate()
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [{
+          data: this.convertPm(),
+          type: 'line',
+          smooth: true
+        }]
+      }
+      detail.setOption(optionMap)
+    }
+  }
+}
+</script>
+
+<style>
+
+</style>
